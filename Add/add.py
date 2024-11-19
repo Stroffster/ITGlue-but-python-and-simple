@@ -13,7 +13,7 @@ def load_asset(path):
 window = tk.Tk()
 window.geometry("500x350")
 window.configure(bg="#ffffff")
-window.title("Untitled")
+window.title("AssetManager")
 
 canvas = tk.Canvas(
     window,
@@ -27,66 +27,6 @@ canvas = tk.Canvas(
 
 canvas.place(x=0, y=0)
 
-class TkForge_Entry(tk.Entry):
-    def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
-        super().__init__(master, **kwargs)
-        
-        self.p, self.p_fg, self.fg = placeholder, placeholder_fg, self.cget("fg")
-        self.putp()
-        self.bind("<FocusIn>", self.toggle)
-        self.bind("<FocusOut>", self.toggle)
-
-    def putp(self):
-        self.delete(0, tk.END)
-        self.insert(0, self.p)
-        self.config(fg=self.p_fg)
-        self.p_a = True
-
-    def toggle(self, event):
-        if self.p_a:
-            self.delete(0, tk.END)
-            self.config(fg=self.fg)
-            self.p_a = False
-        elif not self.get(): self.putp()
-
-    def get(self): return '' if self.p_a else super().get()
-
-    def is_placeholder(self, b):
-        self.p_a = b
-        self.config(fg=self.p_fg if b == True else self.fg)
-
-    def get_placeholder(self): return self.p
-
-class TkForge_Text(tk.Text):
-    def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
-        super().__init__(master, **kwargs)
-        
-        self.p, self.p_fg, self.fg = placeholder, placeholder_fg, self.cget("fg")
-        self.putp()
-        self.bind("<FocusIn>", self.toggle)
-        self.bind("<FocusOut>", self.toggle)
-
-    def putp(self):
-        self.delete('1.0', tk.END)
-        self.insert('1.0', self.p)
-        self.config(fg=self.p_fg)
-        self.p_a = True
-
-    def toggle(self, event):
-        if self.p_a:
-            self.delete('1.0', tk.END)
-            self.config(fg=self.fg)
-            self.p_a = False
-        elif self.get('1.0', tk.END).replace(' ', '').replace('\n', '') == '': self.putp()
-
-    def get(self, i1='1.0', i2=tk.END): return '' if self.p_a else super().get(i1, i2)
-
-    def is_placeholder(self, b):
-        self.p_a = b
-        self.config(fg=self.p_fg if b == True else self.fg)
-
-    def get_placeholder(self): return self.p
-
 canvas.create_rectangle(0, 0, 500, 350, fill='#303030', outline="")
 
 canvas.create_text(
@@ -98,31 +38,31 @@ canvas.create_text(
     font=("Istok Web", 24 * -1)
 )
 
-button_1_image = tk.PhotoImage(file=load_asset("1.png"))
+add_button_img = tk.PhotoImage(file=load_asset("add_button.png"))
 
 button_1 = tk.Button(
-    image=button_1_image,
+    image=add_button_img,
     relief="flat",
     borderwidth=0,
     highlightthickness=0,
     command=lambda: print("button_1 has been pressed!")
 )
 
-button_1.place(x=158, y=312, width=185, height=38)
+button_1.place(x=158, y=311, width=185, height=38)
 
 canvas.create_text(
-    158,
-    312,
+    157,
+    309,
     anchor="nw",
     text="",
     fill="#000000",
     font=("Default Font", 12 * -1)
 )
 
-button_2_image = tk.PhotoImage(file=load_asset("2.png"))
+back_button_img = tk.PhotoImage(file=load_asset("back_button.png"))
 
 button_2 = tk.Button(
-    image=button_2_image,
+    image=back_button_img,
     relief="flat",
     borderwidth=0,
     highlightthickness=0,
@@ -140,88 +80,80 @@ canvas.create_text(
     font=("Default Font", 12 * -1)
 )
 
-textbox_1 = TkForge_Entry(
+textbox_1 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_1.place(x=256, y=77, width=180, height=25)
 
-textbox_2 = TkForge_Entry(
+textbox_2 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_2.place(x=66, y=77, width=180, height=25)
 
-textarea_1 = TkForge_Text(
+textarea_1 = tk.Text(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textarea_1.place(x=256, y=173, width=180, height=127)
 
-textbox_3 = TkForge_Entry(
+textbox_3 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_3.place(x=66, y=125, width=180, height=25)
 
-textbox_4 = TkForge_Entry(
+textbox_4 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_4.place(x=256, y=125, width=180, height=25)
 
-textbox_5 = TkForge_Entry(
+textbox_5 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_5.place(x=66, y=173, width=180, height=25)
 
-textbox_6 = TkForge_Entry(
+textbox_6 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )
 
 textbox_6.place(x=67, y=274, width=180, height=25)
 
-textbox_7 = TkForge_Entry(
+textbox_7 = tk.Entry(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
-    placeholder="#FIXME",
     insertbackground="#ffffff",
     highlightthickness=0
 )

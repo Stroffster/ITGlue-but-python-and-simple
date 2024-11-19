@@ -13,7 +13,7 @@ def load_asset(path):
 window = tk.Tk()
 window.geometry("500x350")
 window.configure(bg="#ffffff")
-window.title("Untitled")
+window.title("AssetManager")
 
 canvas = tk.Canvas(
     window,
@@ -27,9 +27,9 @@ canvas = tk.Canvas(
 
 canvas.place(x=0, y=0)
 
-image_1 = tk.PhotoImage(file=load_asset("computers.png"))
+computers_image = tk.PhotoImage(file=load_asset("computers.png"))
 
-canvas.create_image(100, 175, image=image_1)
+canvas.create_image(100, 175, image=computers_image)
 
 canvas.create_rectangle(200, 0, 500, 350, fill='#5a5a5a', outline="")
 
@@ -42,10 +42,10 @@ canvas.create_text(
     font=("Istok Web", 24 * -1)
 )
 
-button_1_image = tk.PhotoImage(file=load_asset("1.png"))
+add_button_img = tk.PhotoImage(file=load_asset("1.png"))
 
 button_1 = tk.Button(
-    image=button_1_image,
+    image=add_button_img,
     relief="flat",
     borderwidth=0,
     highlightthickness=0,
@@ -63,10 +63,10 @@ canvas.create_text(
     font=("Default Font", 12 * -1)
 )
 
-button_2_image = tk.PhotoImage(file=load_asset("2.png"))
+show_button_img = tk.PhotoImage(file=load_asset("2.png"))
 
 button_2 = tk.Button(
-    image=button_2_image,
+    image=show_button_img,
     relief="flat",
     borderwidth=0,
     highlightthickness=0,
