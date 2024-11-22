@@ -42,7 +42,7 @@ canvas.create_text(
     font=("Istok Web", 24 * -1)
 )
 
-add_button_img = tk.PhotoImage(file=load_asset("1.png"))
+add_button_img = tk.PhotoImage(file=load_asset("add_button.png"))
 
 button_1 = tk.Button(
     image=add_button_img,
@@ -63,7 +63,7 @@ canvas.create_text(
     font=("Default Font", 12 * -1)
 )
 
-show_button_img = tk.PhotoImage(file=load_asset("2.png"))
+show_button_img = tk.PhotoImage(file=load_asset("show_button.png"))
 
 button_2 = tk.Button(
     image=show_button_img,
