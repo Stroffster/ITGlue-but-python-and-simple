@@ -2,6 +2,7 @@ import os
 import sys
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 class App:
     def __init__(self, master):
@@ -30,11 +31,11 @@ class App:
 
     #FIXME add code
     #Create account
-    def Create_account(self, password, password_confirm, email, username):
-        if password == password_confirm:
-            pass
+    def Create_account(self, Password, Password_confirm, Email, Username):
+        if Password == Password_confirm:
+            print(f"password: {Password}, password confirm: {Password_confirm}, email: {Email}, username: {Username}")
         else:
-            pass
+            messagebox.showerror("Error", "Passwords doesn't match")
     
     #FIXME add code
     #Confirm action
@@ -186,7 +187,7 @@ class App:
             font=("Istok Web", 24 * -1)
         )
 
-        textbox_1 = tk.Entry(
+        Email_entry = tk.Entry(
             bd=0,
             bg="#d9d9d9",
             fg="#000000",
@@ -194,9 +195,9 @@ class App:
             highlightthickness=0
         )
 
-        textbox_1.place(x=230, y=147, width=230, height=30)
+        Email_entry.place(x=230, y=147, width=230, height=30)
 
-        password_confirm = tk.Entry(
+        Username_entry = tk.Entry(
             bd=0,
             bg="#d9d9d9",
             fg="#000000",
@@ -204,7 +205,7 @@ class App:
             highlightthickness=0
         )
 
-        password_confirm.place(x=230, y=90, width=230, height=30)
+        Username_entry.place(x=230, y=90, width=230, height=30)
 
         canvas.create_text(
             230,
@@ -224,15 +225,15 @@ class App:
             font=("Istok Web", 14 * -1)
         )
 
-        button_1 = tk.Button(
+        Create_account_button = tk.Button(
             image=self.create_button_img,
             relief="flat",
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self.Create_account(password, password_confirm, email, username) #FIXME
+            command=lambda: self.Create_account(Password_entry.get(), Password_confirm_entry.get(), Email_entry.get(), Username_entry.get()) #FIXME
         )
 
-        button_1.place(x=275, y=302, width=140, height=37)
+        Create_account_button.place(x=275, y=302, width=140, height=37)
 
         canvas.create_text(
             275,
@@ -243,7 +244,7 @@ class App:
             font=("Default Font", 12 * -1)
         )
 
-        textbox_3 = tk.Entry(
+        Password_entry = tk.Entry(
             show="*",
             bd=0,
             bg="#d9d9d9",
@@ -252,7 +253,7 @@ class App:
             highlightthickness=0
         )
 
-        textbox_3.place(x=230, y=203, width=230, height=30)
+        Password_entry.place(x=230, y=203, width=230, height=30)
 
         canvas.create_text(
             230,
@@ -272,7 +273,7 @@ class App:
             font=("Istok Web", 14 * -1)
         )
 
-        textbox_4 = tk.Entry(
+        Password_confirm_entry = tk.Entry(
             show="*",
             bd=0,
             bg="#d9d9d9",
@@ -281,7 +282,7 @@ class App:
             highlightthickness=0
         )
 
-        textbox_4.place(x=230, y=260, width=230, height=30)
+        Password_confirm_entry.place(x=230, y=260, width=230, height=30)
 
         #Main menu screen
     def Main_menu(self):
