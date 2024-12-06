@@ -82,6 +82,18 @@ canvas.create_text(
 
 listbox_1 = tk.Listbox(width=32, height=16)
 
+# Creating a Scrollbar and  
+# attaching it to root window 
+scrollbar_1 = tk.Scrollbar(window)
+scrollbar_1.place(x=345, y=55, height=260)
+
+listbox_1.config(yscrollcommand = scrollbar_1.set)
+
+scrollbar_1.config(command = listbox_1.yview) 
+
+for i in range(100):
+    listbox_1.insert(tk.END, f"Item {i}")
+
 listbox_1.place(x=150, y=55)
 
 window.resizable(False, False)

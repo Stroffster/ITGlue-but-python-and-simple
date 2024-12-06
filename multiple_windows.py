@@ -10,8 +10,9 @@ class App:
         self.master.geometry("500x350")
         self.master.configure(bg="#ffffff")
         self.master.title("AssetManager")
-        self.Login_menu()
-
+        self.Login_menu() #DEBUG
+        #self.Main_menu()
+ 
     #Load assets so the program can use them
     def Load_asset(self, path):
         base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -23,13 +24,18 @@ class App:
             print(f"Fel: Filen {full_path} finns inte!")
         return full_path
     
-    #FIXME add code
+    #FIXME add login to DB check
     #Check login details
     def Login_check(self, password, user):
         print(password, user)
+        if password in ["admin", "Admin"] and password.lower() == user.lower(): #DEBUG make a DB check
+            print("accepted")
+            self.Main_menu()
+        else:
+            messagebox.showerror("Error", "Login details doesn't match!") 
         return
 
-    #FIXME add code
+    #FIXME add real code
     #Create account
     def Create_account(self, Password, Password_confirm, Email, Username):
         if Password == Password_confirm:
@@ -288,6 +294,73 @@ class App:
     def Main_menu(self):
         for i in self.master.winfo_children():
             i.destroy()
+
+        #Ladda bilder och håll en referens
+        self.computers_image = tk.PhotoImage(file=self.Load_asset("computers.png"))
+        self.add_button_img = tk.PhotoImage(file=self.Load_asset("add_button.png"))
+        self.show_button_img = tk.PhotoImage(file=self.Load_asset("show_button.png"))
+
+        canvas = tk.Canvas(
+            bg = "#ffffff",
+            width = 500,
+            height = 350,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        canvas.place(x=0, y=0)
+
+        canvas.create_image(100, 175, image=self.computers_image)
+
+        canvas.create_rectangle(200, 0, 500, 350, fill='#5a5a5a', outline="")
+
+        canvas.create_text(
+            259,
+            20,
+            anchor="nw",
+            text="AssetManager",
+            fill="#f5f5f5",
+            font=("Istok Web", 24 * -1)
+        )
+
+        button_1 = tk.Button(
+            image=self.add_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_1 has been pressed!")
+        )
+
+        button_1.place(x=245, y=140, width=185, height=38)
+
+        canvas.create_text(
+            244,
+            137,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        button_2 = tk.Button(
+            image=self.show_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 has been pressed!")
+        )
+
+        button_2.place(x=245, y=178, width=185, height=38)
+
+        canvas.create_text(
+            245,
+            178,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
 
         #Show assets screen
     def Show_assets(self):
