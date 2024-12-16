@@ -1,6 +1,6 @@
 import hashlib
 
-password = "this-isastrongpassword!09"
+password = "thisisastrongpassword!09"
 # Create a SHA-256 hash object
 hash_object = hashlib.sha256()
 # Convert the password to bytes and hash it
