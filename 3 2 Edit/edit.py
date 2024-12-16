@@ -5,28 +5,6 @@ import os
 import sys
 import tkinter as tk
 
-def load_asset(path):
-    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    assets = os.path.join(base, "assets")
-    return os.path.join(assets, path)
-
-window = tk.Tk()
-window.geometry("500x350")
-window.configure(bg="#ffffff")
-window.title("AssetManager")
-
-canvas = tk.Canvas(
-    window,
-    bg = "#ffffff",
-    width = 500,
-    height = 350,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-
-canvas.place(x=0, y=0)
-
 class TkForge_Entry(tk.Entry):
     def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
         super().__init__(master, **kwargs)
@@ -57,7 +35,7 @@ class TkForge_Entry(tk.Entry):
 
     def get_placeholder(self): return self.p
 
-class TkForge_Text(tk.Text):
+class TkForge_Textarea(tk.Text):
     def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
         super().__init__(master, **kwargs)
         
@@ -86,6 +64,28 @@ class TkForge_Text(tk.Text):
         self.config(fg=self.p_fg if b == True else self.fg)
 
     def get_placeholder(self): return self.p
+
+def load_asset(path):
+    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    assets = os.path.join(base, "assets")
+    return os.path.join(assets, path)
+
+window = tk.Tk()
+window.geometry("500x350")
+window.configure(bg="#ffffff")
+window.title("AssetManager")
+
+canvas = tk.Canvas(
+    window,
+    bg = "#ffffff",
+    width = 500,
+    height = 350,
+    bd = 0,
+    highlightthickness = 0,
+    relief = "ridge"
+)
+
+canvas.place(x=0, y=0)
 
 canvas.create_rectangle(0, 0, 500, 350, fill='#303030', outline="")
 
@@ -162,7 +162,7 @@ textbox_2 = TkForge_Entry(
 
 textbox_2.place(x=66, y=77, width=180, height=25)
 
-textarea_1 = TkForge_Text(
+textarea_1 = TkForge_Textarea(
     bd=0,
     bg="#d9d9d9",
     fg="#ffffff",
