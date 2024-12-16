@@ -4,15 +4,78 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+# Make a placeholder text for a text area
+class TkForge_Entry(tk.Entry):
+    def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
+        super().__init__(master, **kwargs)
+        
+        self.p, self.p_fg, self.fg = placeholder, placeholder_fg, self.cget("fg")
+        self.putp()
+        self.bind("<FocusIn>", self.toggle)
+        self.bind("<FocusOut>", self.toggle)
+
+    def putp(self):
+        self.delete(0, tk.END)
+        self.insert(0, self.p)
+        self.config(fg=self.p_fg)
+        self.p_a = True
+
+    def toggle(self, event):
+        if self.p_a:
+            self.delete(0, tk.END)
+            self.config(fg=self.fg)
+            self.p_a = False
+        elif not self.get(): self.putp()
+
+    def get(self): return '' if self.p_a else super().get()
+
+    def is_placeholder(self, b):
+        self.p_a = b
+        self.config(fg=self.p_fg if b == True else self.fg)
+
+    def get_placeholder(self): return self.p
+
+# Make a placeholder text for a text area
+class TkForge_Textarea(tk.Text):
+    def __init__(self, master=None, placeholder="Enter text", placeholder_fg='grey', **kwargs):
+        super().__init__(master, **kwargs)
+        
+        self.p, self.p_fg, self.fg = placeholder, placeholder_fg, self.cget("fg")
+        self.putp()
+        self.bind("<FocusIn>", self.toggle)
+        self.bind("<FocusOut>", self.toggle)
+
+    def putp(self):
+        self.delete('1.0', tk.END)
+        self.insert('1.0', self.p)
+        self.config(fg=self.p_fg)
+        self.p_a = True
+
+    def toggle(self, event):
+        if self.p_a:
+            self.delete('1.0', tk.END)
+            self.config(fg=self.fg)
+            self.p_a = False
+        elif self.get('1.0', tk.END).replace(' ', '').replace('\n', '') == '': self.putp()
+
+    def get(self, i1='1.0', i2=tk.END): return '' if self.p_a else super().get(i1, i2)
+
+    def is_placeholder(self, b):
+        self.p_a = b
+        self.config(fg=self.p_fg if b == True else self.fg)
+
+    def get_placeholder(self): return self.p
+
 class App:
     def __init__(self, master):
         self.master = master
         self.master.geometry("500x350")
         self.master.configure(bg="#ffffff")
         self.master.title("AssetManager")
-        self.Login_menu() #DEBUG
-        #self.Main_menu()
- 
+        self.Login_menu()
+        #self.Main_menu() #DEBUG
+        #self.Edit_asset()
+
     #Load assets so the program can use them
     def Load_asset(self, path):
         base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -38,32 +101,45 @@ class App:
     #FIXME add real code
     #Create account
     def Create_account(self, Password, Password_confirm, Email, Username):
-        if Password == Password_confirm:
-            print(f"password: {Password}, password confirm: {Password_confirm}, email: {Email}, username: {Username}")
+        if any(char.isspace() for char in [Password, Email, Username]):
+            messagebox.showerror("Error", "Spaces are not allowed in password, email, or username")
+        elif Password != Password_confirm:
+            messagebox.showerror("Error", "Passwords don't match")
         else:
-            messagebox.showerror("Error", "Passwords doesn't match")
-    
-    #FIXME add code
-    #Confirm action
-    def Confirm_action(self):
-        # Create the popup window
-        popup = tk.Tk()
+            confirmation = self.Confirm_admin_action()
+            if confirmation:
+                print(f"password: {Password}, password confirm: {Password_confirm}, email: {Email}, username: {Username}")
+                self.Main_menu()  # Access main menu after successful account creation
+
+
+    def Confirm_admin_action(self):
+        popup = tk.Toplevel(self.master)  # Create a child window for confirmation
         popup.title("Confirm Choice")
-        popup.geometry("250x70")
+        popup.geometry("250x105")
         center_window(popup)
 
-        # Create a label
-        Confirm_action_label = tk.Label(popup, text="Enter admin password to make an account")
-        Confirm_action_label.pack()
+        Confirm_admin_action_label = tk.Label(popup, text="Enter admin password to make an account")
+        Confirm_admin_action_label.pack()
 
-        # Create an entry field
-        Confirm_action_entry = tk.Entry(popup)
-        Confirm_action_entry.pack()
+        Confirm_admin_action_entry = tk.Entry(popup, show="*")  # Hide password characters
+        Confirm_admin_action_entry.pack()
+        
+        # Check login
+        def admin_login_check():
+            password = Confirm_admin_action_entry.get()
 
-        # Create a confirm button
-        confirm_button = tk.Button(popup, text="Confirm", command= lambda: self.Login_check(Confirm_action_entry.get(), "Admin"))
-        confirm_button.pack()
+            if password.lower() == "admin": #DEBUG add DB thingy
+                popup.destroy()
+                print("yay!")
+            else:
+                messagebox.showerror("Error", "Login details don't match!")
+        
+        confirm_button = tk.Button(popup, text="Confirm", command=admin_login_check)
+        confirm_button.pack(pady=5)
 
+        Cancel_button = tk.Button(popup, text="Cancel", command=lambda: popup.destroy())
+        Cancel_button.pack()
+          
     #Menus/screens
 
         #Login screen
@@ -329,7 +405,7 @@ class App:
             relief="flat",
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_1 has been pressed!")
+            command=self.Add_asset
         )
 
         button_1.place(x=245, y=140, width=185, height=38)
@@ -348,7 +424,7 @@ class App:
             relief="flat",
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_2 has been pressed!")
+            command= self.Show_assets
         )
 
         button_2.place(x=245, y=178, width=185, height=38)
@@ -367,15 +443,533 @@ class App:
         for i in self.master.winfo_children():
             i.destroy()
 
-        #Edit asset screen
+        #Ladda bilder och håll en referens
+        self.edit_button_img = tk.PhotoImage(file=self.Load_asset("edit_button.png"))
+        self.back_button_img = tk.PhotoImage(file=self.Load_asset("back_button.png"))
+
+        canvas = tk.Canvas(
+            bg = "#ffffff",
+            width = 500,
+            height = 350,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        canvas.place(x=0, y=0)
+
+        canvas.create_rectangle(0, 0, 500, 350, fill='#5a5a5a', outline="")
+
+        canvas.create_text(
+            164,
+            18,
+            anchor="nw",
+            text="AssetManager",
+            fill="#f5f5f5",
+            font=("Istok Web", 24 * -1)
+        )
+
+        button_1 = tk.Button(
+            image=self.edit_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.Edit_asset
+        )
+
+        button_1.place(x=158, y=312, width=185, height=38)
+
+        canvas.create_text(
+            158,
+            312,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        button_2 = tk.Button(
+            image=self.back_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.Main_menu
+        )
+
+        button_2.place(x=1, y=0, width=99, height=29)
+
+        canvas.create_text(
+            1,
+            0,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        listbox_1 = tk.Listbox(width=32, height=16)
+
+        # Creating a Scrollbar and  
+        # attaching it to root window 
+        scrollbar_1 = tk.Scrollbar()
+        scrollbar_1.place(x=345, y=55, height=259)
+
+        listbox_1.config(yscrollcommand = scrollbar_1.set)
+
+        scrollbar_1.config(command = listbox_1.yview) 
+
+        for i in range(100):
+            listbox_1.insert(tk.END, f"Item {i}")
+
+        listbox_1.place(x=150, y=55)
+
+        #Edit asset screen #FIXME
     def Edit_asset(self):
         for i in self.master.winfo_children():
             i.destroy()
+
+        self.edit_button_img = tk.PhotoImage(file=self.Load_asset("edit_button.png"))
+        self.back_button_img = tk.PhotoImage(file=self.Load_asset("back_button.png"))
+
+        canvas = tk.Canvas(
+            bg = "#ffffff",
+            width = 500,
+            height = 350,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        canvas.place(x=0, y=0)
+
+        canvas.create_rectangle(0, 0, 500, 350, fill='#5a5a5a', outline="")
+
+        canvas.create_text(
+            164,
+            18,
+            anchor="nw",
+            text="AssetManager",
+            fill="#f5f5f5",
+            font=("Istok Web", 24 * -1)
+        )
+
+        button_1 = tk.Button(
+            image=self.edit_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_1 has been pressed!") #FIXME
+        )
+
+        button_1.place(x=158, y=312, width=185, height=38)
+
+        canvas.create_text(
+            158,
+            312,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        button_2 = tk.Button(
+            image=self.back_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.Show_assets
+        )
+
+        button_2.place(x=1, y=0, width=99, height=29)
+
+        canvas.create_text(
+            1,
+            0,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        textbox_1 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_1.place(x=256, y=77, width=180, height=25)
+
+        textbox_2 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_2.place(x=66, y=77, width=180, height=25)
+
+        textarea_1 = TkForge_Textarea(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textarea_1.place(x=256, y=173, width=180, height=127)
+
+        textbox_3 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_3.place(x=66, y=125, width=180, height=25)
+
+        textbox_4 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_4.place(x=256, y=125, width=180, height=25)
+
+        textbox_5 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_5.place(x=66, y=173, width=180, height=25)
+
+        textbox_6 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_6.place(x=67, y=274, width=180, height=25)
+
+        textbox_7 = TkForge_Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            placeholder="#FIXME",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_7.place(x=67, y=223, width=180, height=25)
+
+        canvas.create_text(
+            116,
+            102,
+            anchor="nw",
+            text="Service Tag",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            288,
+            102,
+            anchor="nw",
+            text="End Of Warranty",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            107,
+            150,
+            anchor="nw",
+            text="Purchase Date",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            326,
+            150,
+            anchor="nw",
+            text="Notes",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            104,
+            248,
+            anchor="nw",
+            text="Location/Office",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            111,
+            196,
+            anchor="nw",
+            text="Model Name",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            116,
+            51,
+            anchor="nw",
+            text="Asset Name",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            291,
+            51,
+            anchor="nw",
+            text="Asset Owner",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
 
         #Add asset screen
     def Add_asset(self):
         for i in self.master.winfo_children():
             i.destroy()
+
+        self.add_button_img = tk.PhotoImage(file=self.Load_asset("add_button.png"))
+        self.back_button_img = tk.PhotoImage(file=self.Load_asset("back_button.png"))
+
+        canvas = tk.Canvas(
+            bg = "#ffffff",
+            width = 500,
+            height = 350,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        canvas.place(x=0, y=0)
+
+        canvas.create_rectangle(0, 0, 500, 350, fill='#5a5a5a', outline="")
+
+        canvas.create_text(
+            164,
+            18,
+            anchor="nw",
+            text="AssetManager",
+            fill="#f5f5f5",
+            font=("Istok Web", 24 * -1)
+        )
+
+        button_1 = tk.Button(
+            image=self.add_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_1 has been pressed!") #FIXME
+        )
+
+        button_1.place(x=158, y=311, width=185, height=38)
+
+        canvas.create_text(
+            157,
+            309,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        button_2 = tk.Button(
+            image=self.back_button_img,
+            relief="flat",
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.Main_menu
+        )
+
+        button_2.place(x=1, y=0, width=99, height=29)
+
+        canvas.create_text(
+            1,
+            0,
+            anchor="nw",
+            text="",
+            fill="#000000",
+            font=("Default Font", 12 * -1)
+        )
+
+        textbox_1 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_1.place(x=256, y=77, width=180, height=25)
+
+        textbox_2 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_2.place(x=66, y=77, width=180, height=25)
+
+        textarea_1 = tk.Text(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textarea_1.place(x=256, y=173, width=180, height=127)
+
+        textbox_3 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_3.place(x=66, y=125, width=180, height=25)
+
+        textbox_4 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_4.place(x=256, y=125, width=180, height=25)
+
+        textbox_5 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_5.place(x=66, y=173, width=180, height=25)
+
+        textbox_6 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_6.place(x=67, y=274, width=180, height=25)
+
+        textbox_7 = tk.Entry(
+            bd=0,
+            bg="#d9d9d9",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=0
+        )
+
+        textbox_7.place(x=67, y=223, width=180, height=25)
+
+        canvas.create_text(
+            116,
+            102,
+            anchor="nw",
+            text="Service Tag",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            288,
+            102,
+            anchor="nw",
+            text="End Of Warranty",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            107,
+            150,
+            anchor="nw",
+            text="Purchase Date",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            326,
+            150,
+            anchor="nw",
+            text="Notes",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            104,
+            248,
+            anchor="nw",
+            text="Location/Office",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            111,
+            196,
+            anchor="nw",
+            text="Model Name",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            116,
+            51,
+            anchor="nw",
+            text="Asset Name",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
+
+        canvas.create_text(
+            291,
+            51,
+            anchor="nw",
+            text="Asset Owner",
+            fill="#ffffff",
+            font=("Istok Web", 14 * -1)
+        )
 
 #Center the window to the center of the screen
 def center_window(window):
