@@ -1,8 +1,15 @@
 import os
 import sys
-import tkinter as tk
+import tkinter as tk #Importing the GUI libary
+import asyncio #Import sync libary
+import asyncpg #Database connection thingy ma jig
+import hashlib #Impoting encryption libary
+
 from tkinter import ttk
 from tkinter import messagebox
+from asyncpg.pool import create_pool #Import the database connection function
+
+from Apikeys import DB #Get the database class with login information
 
 # Make a placeholder text for a text area
 class TkForge_Entry(tk.Entry):
@@ -67,14 +74,13 @@ class TkForge_Textarea(tk.Text):
     def get_placeholder(self): return self.p
 
 class App:
-    def __init__(self, master):
+    async def __init__(self, master):
         self.master = master
         self.master.geometry("500x350")
         self.master.configure(bg="#ffffff")
         self.master.title("AssetManager")
-        self.Login_menu()
-        #self.Main_menu() #DEBUG
-        #self.Edit_asset()
+        #self.Login_menu()
+        self.Main_menu() #DEBUG
 
     #Load assets so the program can use them
     def Load_asset(self, path):
